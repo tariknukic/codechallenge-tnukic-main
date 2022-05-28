@@ -1,0 +1,14 @@
+﻿version: '3'
+services:
+  
+  challenge:
+    build: .
+    ports:
+      - "3000:3000"
+        
+  ## Don't touch this section. The acceptance test must run.
+  acceptance-test:
+    image: ghcr.io/dccs-it-business-solutions/codechallenge:latest
+    environment:
+      - CHALLENGE_HOST=challenge
+      
