@@ -85,7 +85,7 @@ router.post('/assigned', asyncHanlder(async (req, res, next)=>{
 
         if (teamId) {
             res.set({'Content-Type': 'text/javascript'});
-            res.json(`ID=${teamId}`);
+            res.send(`ID=${teamId}`);
         } else {
             const projectIsWaiting = await crud.findWaitingProject(projectId);
 
