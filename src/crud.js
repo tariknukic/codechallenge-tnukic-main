@@ -68,8 +68,15 @@ async function calculateIdleDevelopersFor(team) {
 async function assignProject(project) {
     const data = await getData();
     const { teams, assignments, projectsWaiting } = data;
+    const team = null;
 
-    const team = teams.find(team => await calculateIdleDevelopersFor(team) >= project.devs_needed);
+    for (let i = 0; i < teams; i++) {
+        team = teams[i];
+
+        if (await calculateIdleDevelopersFor(team) >= project.devs_needed) {
+            break;
+        }
+    }
 
     if (team) {
         assignments.push({ project, team });
