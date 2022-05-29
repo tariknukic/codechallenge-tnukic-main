@@ -51,11 +51,13 @@ async function calculateIdleDevelopersFor(team) {
     const assignments = data.assignments;
     let allDevs = 0;
 
-    assignments.forEach(assignment => {
-        if (team.id = assignment.team.id) {
-            allDevs += assignment.project.devs_needed;
-        }
-    });
+    if (assignments.length > 0) {
+        assignments.forEach(assignment => {
+            if (team.id == assignment.team.id) {
+                allDevs += assignment.project.devs_needed;
+            }
+        });
+    }
 
     return team.developers - allDevs;
 }
@@ -68,9 +70,9 @@ async function calculateIdleDevelopersFor(team) {
 async function assignProject(project) {
     const data = await getData();
     const { teams, assignments, projectsWaiting } = data;
-    const team = null;
+    let team = null;
 
-    for (let i = 0; i < teams; i++) {
+    for (let i = 0; i < teams.length; i++) {
         team = teams[i];
 
         if (await calculateIdleDevelopersFor(team) >= project.devs_needed) {

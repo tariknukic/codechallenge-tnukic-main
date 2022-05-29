@@ -28,11 +28,12 @@ router.put('/teams', asyncHanlder(async (req, res, next)=>{
     let requestFailed = false;
 
     if (arrayTeams.length > 0) {
-        arrayTeams.forEach(team => {
-            if (team.developers == null || team.id == null) {
+        for (let i = 0; i < arrayTeams.length; i++) {
+            if (arrayTeams[i].developers == null || arrayTeams[i].id == null) {
                 requestFailed = true;
+                break;
             }
-        });
+        }
 
         if (!requestFailed) {
             await crud.updateTeams(arrayTeams);
