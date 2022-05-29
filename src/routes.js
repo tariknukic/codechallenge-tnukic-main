@@ -28,8 +28,8 @@ router.put('/teams', asyncHanlder(async (req, res, next)=>{
     let requestFailed = false;
 
     if (arrayTeams.length > 0) {
-        arrayTeams.forEach((item) => {
-            if (item.developers == null || item.id == null) {
+        arrayTeams.forEach(team => {
+            if (team.developers == null || team.id == null) {
                 requestFailed = true;
             }
         });

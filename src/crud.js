@@ -41,9 +41,23 @@ async function updateTeams(newTeams){
 
     data.teams = newTeams;
     data.assignments = [];
-    data.projectsWaiting = [];
+    data.projectsWaiting = []; 
 
     await save(data);
+}
+
+async function calculateIdleDevelopersFor(team) {
+    const data = await getData();
+    const assignments = data.assignments;
+    let allDevs = 0;
+
+    assignments.forEach(assignment => {
+        if (team.id = assignment.team.id) {
+            allDevs += assignment.project.devs_needed;
+        }
+    });
+
+    return team.developers - allDevs;
 }
 
 
@@ -55,7 +69,7 @@ async function assignProject(project) {
     const data = await getData();
     const { teams, assignments, projectsWaiting } = data;
 
-    const team = teams.find(item => item.developers >= project.devs_needed);
+    const team = teams.find(team => await calculateIdleDevelopersFor(team) >= project.devs_needed);
 
     if (team) {
         assignments.push({ project, team });
