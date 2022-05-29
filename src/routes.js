@@ -81,10 +81,10 @@ router.post('/assigned', asyncHanlder(async (req, res, next)=>{
     const projectId = req.body.ID;
 
     if (req.is('application/x-www-form-urlencoded')) {
-        const team = await crud.findTeamForProject(projectId);
+        const teamId = await crud.findTeamForProject(projectId);
 
-        if (team) {
-            res.json(team);
+        if (teamId) {
+            res.json(teamId);
         } else {
             const projectIsWaiting = await crud.findWaitingProject(projectId);
 

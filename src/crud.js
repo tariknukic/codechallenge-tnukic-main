@@ -1,33 +1,35 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 
 /* Save the data in data.json */
-function save(data){
-    return new Promise((resolve, reject) => {
-        fs.writeFile('data.json', JSON.stringify(data, null, 2), (err) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve();
-        }
-        });
-    });
+async function save(data){
+    await fs.writeFile('data.json', JSON.stringify(data, null, 2));
+}
+
+async function dbExists(path) {
+    try {
+        await fs.stat(path);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function initDb(path) {
+    const empty_db = { teams: [], assignments: [], projectsWaiting: [] };
+    await fs.writeFile(path, JSON.stringify(empty_db));
 }
 
 /**
  * Gets all teams
  * @param None
  */
-function getData(){
-    return new Promise((resolve, reject) => {
-        fs.readFile('data.json', 'utf8', (err, data) => {
-        if (err) {
-            reject(err);
-        } else {
-            const json = JSON.parse(data);
-            resolve(json);
-        }
-        });
-    });
+async function getData(){
+    if (!await dbExists("data.json")) {
+        await initDb("data.json");
+    }
+
+    const data = await fs.readFile('data.json', 'utf8');
+    return JSON.parse(data);
 }
 
 /**
@@ -75,7 +77,7 @@ async function assignProject(project) {
     
     const projectAssigned = assignments.find(item => item.project.id == projectId);
     if (projectAssigned) {
-        return projectAssigned.team;
+        return projectAssigned.team.id;
     } else {
         return null;
     }
