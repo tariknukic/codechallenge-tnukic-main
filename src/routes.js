@@ -16,9 +16,7 @@ function asyncHandler(cb) {
 
 
 /* Service has started up correctly and is ready to accept requests */
-router.get("/status", (req, res, next) => {
-    res.send("OK");
-});
+
 
 /* Update the list of teams */
 router.put('/teams', asyncHandler(async (req, res, next)=>{
