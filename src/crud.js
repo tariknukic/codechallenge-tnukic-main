@@ -58,7 +58,7 @@ async function calculateIdleDevelopersFor(team) {
             }
         });
     }
-
+    
     return team.developers - allDevs;
 }
 
@@ -78,10 +78,21 @@ async function assignProject(project) {
         if (await calculateIdleDevelopersFor(team) >= project.devs_needed) {
             break;
         }
+
+        if (i == teams.length - 1) {
+            team = null;
+        }
     }
+    
 
     if (team) {
         assignments.push({ project, team });
+
+        const indexOfWaitingProject = projectsWaiting.findIndex(item => item.id == project.id);
+
+        if (indexOfWaitingProject !== -1) {
+            projectsWaiting.splice(indexOfWaitingProject, 1);
+        }
     } else {
         projectsWaiting.push(project);
     }
@@ -122,6 +133,14 @@ async function assignProject(project) {
     }
 }
 
+async function assignWaitingProject() {
+    const { projectsWaiting } = await getData();
+
+    projectsWaiting.forEach(async (project) => {
+        await assignProject(project);
+    });
+}
+
 /**
  * Check if the completed project is already assigned 
  * @param {Integer} ID - ID of the completed project 
@@ -136,6 +155,7 @@ async function assignProject(project) {
     if (indexOfAssignedProject !== -1) {
         assignments.splice(indexOfAssignedProject, 1);
         await save(data);
+        await assignWaitingProject();
         return true;
     } else if (indexOfWaitingProject !== -1) {
         projectsWaiting.splice(indexOfWaitingProject, 1);
