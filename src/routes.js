@@ -2,11 +2,9 @@ const express = require("express");
 const router = express.Router();
 const crud = require('./crud');
 
-/*
- *** HELPER FUNCTION ***
- */
+
 /* Handler function to wrap each route. */
-function asyncHanlder(cb) {
+function asyncHandler(cb) {
     return async(req, res, next) => {
         try {
             await cb(req, res, next);
@@ -23,32 +21,20 @@ router.get("/status", (req, res, next) => {
 });
 
 /* Update the list of teams */
-router.put('/teams', asyncHanlder(async (req, res, next)=>{
-    const arrayTeams = req.body;
-    let requestFailed = false;
-
-    if (arrayTeams.length > 0) {
-        for (let i = 0; i < arrayTeams.length; i++) {
-            if (arrayTeams[i].developers == null || arrayTeams[i].id == null) {
-                requestFailed = true;
-                break;
-            }
-        }
-
-        if (!requestFailed) {
-            await crud.updateTeams(arrayTeams);
-            res.end(); 
-        } else {
-            res.status(400).end();
-        }
-    } else {
+router.put('/teams', asyncHandler(async (req, res, next)=>{
+    const teams = req.body;
+ 
+    if (teams.length === 0 || teams.some(team => team.developers == null || team.id == null)) {
         res.status(400).end();
+        return;
     }
-    
+
+    await crud.updateTeams(teams);
+    res.end();
 }));
 
 /* Assigning a project to a team */
-router.post('/project', asyncHanlder(async (req, res, next)=>{
+router.post('/project', asyncHandler(async (req, res, next)=>{
     const project = req.body;
 
     if (project.id != null && project.devs_needed != null) {
@@ -61,60 +47,41 @@ router.post('/project', asyncHanlder(async (req, res, next)=>{
 
 
 /* A project has been completed */
-router.post('/completed', asyncHanlder(async (req, res, next)=>{
+router.post('/completed', asyncHandler(async (req, res, next)=>{
     const projectId = req.body.ID;
 
     if (req.is('application/x-www-form-urlencoded')) {
         const projectFound = await crud.findCompletedProject(projectId);
 
-        if (projectFound) {
-            res.status(200).end();
-        } else {
-            res.status(404).end();
-        }
+        const status = projectFound ? 200 : 404;
+        res.status(status).end();
     } else {
         res.status(400).end();
     }
 }));
 
 /* Return team which the project is assigned to */
-router.post('/assigned', asyncHanlder(async (req, res, next)=>{
+router.post('/assigned', asyncHandler(async (req, res, next)=>{
     const projectId = req.body.ID;
 
-    if (req.is('application/x-www-form-urlencoded')) {
-        const teamId = await crud.findTeamForProject(projectId);
-
-        if (teamId) {
-            res.set({'Content-Type': 'text/javascript'});
-            res.send(`ID=${teamId}`);
-        } else {
-            const projectIsWaiting = await crud.findWaitingProject(projectId);
-
-            if (projectIsWaiting) {
-                res.status(204).end();
-            } else {
-                res.status(404).end();
-            }
-        }
-    } else {
+    if (!req.is('application/x-www-form-urlencoded')) {
         res.status(400).end();
+        return;
     }
+
+    const teamId = await crud.findTeamForProject(projectId);
+
+    if (teamId) {
+        res.set({'Content-Type': 'text/javascript'});
+        res.send(`ID=${teamId}`);
+    } else {
+        const projectIsWaiting = await crud.findWaitingProject(projectId);
+
+        const status = projectIsWaiting ? 204 : 404;
+        res.status(status).end();
+    }
+    
 }));
 
 
 module.exports = router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
